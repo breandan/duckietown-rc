@@ -19,65 +19,51 @@ package edu.umontreal.duckietownrc
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.Button
 import com.github.rosjava.android_remocons.common_tools.apps.RosAppActivity
+import kotlinx.android.synthetic.main.main.*
 import org.ros.android.BitmapFromCompressedImage
 import org.ros.android.view.RosImageView
-import org.ros.android.view.VirtualJoystickView
 import org.ros.node.NodeConfiguration
 import org.ros.node.NodeMainExecutor
 import java.io.IOException
+import java.net.Socket
+
 
 class MainActivity : RosAppActivity("android duckietown", "android duckietown") {
-    private var cameraView: RosImageView<sensor_msgs.CompressedImage>? = null
-    private var virtualJoystickView: VirtualJoystickView? = null
-    private var backButton: Button? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         setDashboardResource(R.id.top_bar)
         setMainWindowResource(R.layout.main)
         super.onCreate(savedInstanceState)
 
-        cameraView = findViewById<View>(R.id.image) as RosImageView<sensor_msgs.CompressedImage>
-        cameraView!!.setMessageType(sensor_msgs.CompressedImage._TYPE)
-        cameraView!!.setMessageToBitmapCallable(BitmapFromCompressedImage())
-        virtualJoystickView = findViewById<View>(R.id.virtual_joystick) as VirtualJoystickView
-        backButton = findViewById<View>(R.id.back_button) as Button
-        backButton!!.setOnClickListener { onBackPressed() }
+        image.setMessageType(sensor_msgs.CompressedImage._TYPE)
+        (image as RosImageView<sensor_msgs.CompressedImage>).setMessageToBitmapCallable(BitmapFromCompressedImage())
+        back_button.setOnClickListener { onBackPressed() }
     }
 
     override fun init(nodeMainExecutor: NodeMainExecutor) {
         super.init(nodeMainExecutor)
 
         try {
-            val socket = java.net.Socket(masterUri.host, masterUri.port)
-            val localNetworkAddress = socket.localAddress
-            socket.close()
-            val nodeConfiguration = NodeConfiguration.newPublic(localNetworkAddress.hostAddress, masterUri)
+            val nodeConfiguration = Socket(masterUri.host, masterUri.port).use {
+                NodeConfiguration.newPublic(it.localAddress.hostAddress, masterUri)
+            }
 
-            var joyTopic = remaps.get(getString(R.string.joystick_topic))
-            var camTopic = remaps.get(getString(R.string.camera_topic))
+            val joyTopic = getRemap(R.string.joystick_topic)
+            val camTopic = getRemap(R.string.camera_topic)
 
-            val appNameSpace = masterNameSpace
-            joyTopic = appNameSpace.resolve(joyTopic).toString()
-            camTopic = appNameSpace.resolve(camTopic).toString()
+            image.setTopicName(camTopic)
+            virtual_joystick.setTopicName(joyTopic)
 
-            cameraView!!.setTopicName(camTopic)
-            virtualJoystickView!!.setTopicName(joyTopic)
-
-            nodeMainExecutor.execute(
-                cameraView, nodeConfiguration
-                    .setNodeName("android/camera_view")
-            )
-            nodeMainExecutor.execute(
-                virtualJoystickView,
-                nodeConfiguration.setNodeName("android/virtual_joystick")
-            )
+            nodeMainExecutor.run {
+                execute(image, nodeConfiguration.setNodeName("android/camera_view"))
+                execute(virtual_joystick, nodeConfiguration.setNodeName("android/virtual_joystick"))
+            }
         } catch (e: IOException) {
             // Socket problem
         }
     }
+
+    private fun getRemap(id: Int) = masterNameSpace.resolve(remaps.get(getString(id))).toString()
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menu.add(0, 0, 0, R.string.stop_app)
