@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="stop_app">Kill</string>
+    <string name="app_name">Duckietown RC</string>
+    <string name="camera_topic">/duckiebot/camera_node</string>
+    <string name="joystick_topic">/duckiebot/joy_node</string>
+</resources>
