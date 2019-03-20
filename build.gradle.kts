@@ -1,4 +1,3 @@
-
 buildscript {
     val kotlinVersion by extra { "1.3.21" }
 
