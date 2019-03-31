@@ -2,6 +2,9 @@
 <resources>
 	<string name="stop_app">Kill</string>
     <string name="app_name">Duckietown RC</string>
-    <string name="camera_topic">/duckiebot/camera_node</string>
+    <string name="camera_topic">/usb_cam/image_raw/compressed</string>
     <string name="joystick_topic">/duckiebot/joy_node</string>
+    <string name="description_info">Info</string>
+    <string name="request_permission">This sample needs camera permission.</string>
+    <string name="camera_error">This device doesn\'t support Camera2 API.</string>
 </resources>

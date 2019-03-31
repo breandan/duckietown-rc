@@ -16,7 +16,9 @@
 
 package edu.umontreal.duckietownrc
 
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.github.rosjava.android_remocons.common_tools.apps.RosAppActivity
@@ -25,18 +27,27 @@ import org.ros.android.BitmapFromCompressedImage
 import org.ros.android.view.RosImageView
 import org.ros.node.NodeConfiguration
 import org.ros.node.NodeMainExecutor
+import sensor_msgs.CompressedImage
 import java.io.IOException
 import java.net.Socket
 
 
 class MainActivity : RosAppActivity("android duckietown", "android duckietown") {
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.i("DUCKIETOWN_REGISTERED", "ACTIVITY CREATED")
+
         setDashboardResource(R.id.top_bar)
         setMainWindowResource(R.layout.main)
         super.onCreate(savedInstanceState)
 
         image.setMessageType(sensor_msgs.CompressedImage._TYPE)
-        (image as RosImageView<sensor_msgs.CompressedImage>).setMessageToBitmapCallable(BitmapFromCompressedImage())
+        (image as RosImageView<sensor_msgs.CompressedImage>).setMessageToBitmapCallable(object:
+            BitmapFromCompressedImage() {
+            override fun call(message: CompressedImage?): Bitmap {
+                Log.i("IM_RECEIVED", message?.format)
+                return super.call(message)
+            }
+        })
         back_button.setOnClickListener { onBackPressed() }
     }
 
@@ -44,6 +55,8 @@ class MainActivity : RosAppActivity("android duckietown", "android duckietown") 
         super.init(nodeMainExecutor)
 
         try {
+            Log.i("DUCKIETOWN_REGISTERED", "I AM NOW REGISTERED")
+
             val nodeConfiguration = Socket(masterUri.host, masterUri.port).use {
                 NodeConfiguration.newPublic(it.localAddress.hostAddress, masterUri)
             }
