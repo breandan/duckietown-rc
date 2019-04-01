@@ -113,7 +113,6 @@ class CameraConnectionFragment private constructor(
             cameraOpenCloseLock.release()
             cd.close()
             cameraDevice = null
-            val activity = activity
             activity?.finish()
         }
     }
@@ -144,15 +143,12 @@ class CameraConnectionFragment private constructor(
      * @param text The message to show
      */
     private fun showToast(text: String) {
-        val activity = activity
         activity?.runOnUiThread { Toast.makeText(activity, text, Toast.LENGTH_SHORT).show() }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle
-    ): View? {
-        return inflater.inflate(layout, container, false)
-    }
+    ): View? = inflater.inflate(layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById(R.id.texture)
@@ -207,11 +203,9 @@ class CameraConnectionFragment private constructor(
 
             // We fit the aspect ratio of TextureView to the size of preview we picked.
             val orientation = resources.configuration.orientation
-            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE)
                 textureView!!.setAspectRatio(previewSize.width, previewSize.height)
-            } else {
-                textureView!!.setAspectRatio(previewSize.height, previewSize.width)
-            }
+            else textureView!!.setAspectRatio(previewSize.height, previewSize.width)
         } catch (e: CameraAccessException) {
             LOGGER.e(e, "Exception!")
         } catch (e: NullPointerException) {
@@ -319,9 +313,7 @@ class CameraConnectionFragment private constructor(
 
                     override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
                         // The camera is already closed
-                        if (null == cameraDevice) {
-                            return
-                        }
+                        if (null == cameraDevice) return
 
                         // When the session is ready, we start displaying the preview.
                         captureSession = cameraCaptureSession
@@ -344,7 +336,6 @@ class CameraConnectionFragment private constructor(
                         } catch (e: CameraAccessException) {
                             LOGGER.e(e, "Exception!")
                         }
-
                     }
 
                     override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
@@ -407,7 +398,6 @@ class CameraConnectionFragment private constructor(
 
     /** Shows an error message dialog.  */
     class ErrorDialog : DialogFragment() {
-
         override fun onCreateDialog(savedInstanceState: Bundle) =
             activity.run {
                 AlertDialog.Builder(this)
@@ -444,10 +434,12 @@ class CameraConnectionFragment private constructor(
         private val FRAGMENT_DIALOG = "dialog"
 
         init {
-            ORIENTATIONS.append(Surface.ROTATION_0, 90)
-            ORIENTATIONS.append(Surface.ROTATION_90, 0)
-            ORIENTATIONS.append(Surface.ROTATION_180, 270)
-            ORIENTATIONS.append(Surface.ROTATION_270, 180)
+            ORIENTATIONS.run {
+                append(Surface.ROTATION_0, 90)
+                append(Surface.ROTATION_90, 0)
+                append(Surface.ROTATION_180, 270)
+                append(Surface.ROTATION_270, 180)
+            }
         }
 
         /**
@@ -468,16 +460,11 @@ class CameraConnectionFragment private constructor(
             val bigEnough = ArrayList<Size>()
             val tooSmall = ArrayList<Size>()
             for (option in choices) {
-                if (option == desiredSize) {
-                    // Set the size but don't return yet so that remaining sizes will still be logged.
-                    exactSizeFound = true
-                }
+                // Set the size but don't return yet so that remaining sizes will still be logged.
+                if (option == desiredSize) exactSizeFound = true
 
-                if (option.height >= minSize && option.width >= minSize) {
-                    bigEnough.add(option)
-                } else {
-                    tooSmall.add(option)
-                }
+                if (option.height >= minSize && option.width >= minSize) bigEnough.add(option)
+                else tooSmall.add(option)
             }
 
             LOGGER.i("Desired size: " + desiredSize + ", min size: " + minSize + "x" + minSize)

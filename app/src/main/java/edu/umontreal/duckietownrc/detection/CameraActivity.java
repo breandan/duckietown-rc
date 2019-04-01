@@ -117,14 +117,12 @@ public abstract class CameraActivity extends AppCompatActivity
     yuvBytes[0] = bytes;
     yRowStride = previewWidth;
 
-    imageConverter =
-            () -> ImageUtils.convertYUV420SPToARGB8888(bytes, previewWidth, previewHeight, rgbBytes);
+    imageConverter = () -> ImageUtils.convertYUV420SPToARGB8888(bytes, previewWidth, previewHeight, rgbBytes);
 
-    postInferenceCallback =
-            () -> {
-              camera.addCallbackBuffer(bytes);
-              isProcessingFrame = false;
-            };
+    postInferenceCallback = () -> {
+        camera.addCallbackBuffer(bytes);
+        isProcessingFrame = false;
+    };
     processImage();
   }
 
@@ -132,23 +130,18 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public void onImageAvailable(final ImageReader reader) {
     // We need wait until we have some size from onPreviewSizeChosen
-    if (previewWidth == 0 || previewHeight == 0) {
-      return;
-    }
-    if (rgbBytes == null) {
-      rgbBytes = new int[previewWidth * previewHeight];
-    }
+    if (previewWidth == 0 || previewHeight == 0) return;
+    if (rgbBytes == null) rgbBytes = new int[previewWidth * previewHeight];
     try {
       final Image image = reader.acquireLatestImage();
 
-      if (image == null) {
-        return;
-      }
+      if (image == null) return;
 
       if (isProcessingFrame) {
         image.close();
         return;
       }
+
       isProcessingFrame = true;
       Trace.beginSection("imageAvailable");
       final Plane[] planes = image.getPlanes();
@@ -229,14 +222,11 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
   protected synchronized void runInBackground(final Runnable r) {
-    if (handler != null) {
-      handler.post(r);
-    }
+    if (handler != null) handler.post(r);
   }
 
   @Override
-  public void onRequestPermissionsResult(
-      final int requestCode, final String[] permissions, final int[] grantResults) {
+  public void onRequestPermissionsResult(final int requestCode, final String[] permissions, final int[] grantResults) {
     if (requestCode == PERMISSIONS_REQUEST) {
       if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
         setFragment();
@@ -247,22 +237,19 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
   private boolean hasPermission() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      return checkSelfPermission(PERMISSION_CAMERA) == PackageManager.PERMISSION_GRANTED;
-    } else {
-      return true;
-    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        return checkSelfPermission(PERMISSION_CAMERA) == PackageManager.PERMISSION_GRANTED;
+    else return true;
   }
 
   private void requestPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-      if (shouldShowRequestPermissionRationale(PERMISSION_CAMERA)) {
-        Toast.makeText(
-                CameraActivity.this,
-                "Camera permission is required for this demo",
-                Toast.LENGTH_LONG)
-            .show();
-      }
+      if (shouldShowRequestPermissionRationale(PERMISSION_CAMERA))
+          Toast.makeText(
+              CameraActivity.this,
+              "Camera permission is required for this demo",
+              Toast.LENGTH_LONG)
+              .show();
       requestPermissions(new String[] {PERMISSION_CAMERA}, PERMISSIONS_REQUEST);
     }
   }
@@ -271,9 +258,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private boolean isHardwareLevelSupported(
       CameraCharacteristics characteristics, int requiredLevel) {
     int deviceLevel = characteristics.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-    if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
-      return requiredLevel == deviceLevel;
-    }
+    if (deviceLevel == CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) return requiredLevel == deviceLevel;
     // deviceLevel is not LEGACY, can use numerical sort
     return requiredLevel <= deviceLevel;
   }
@@ -286,16 +271,12 @@ public abstract class CameraActivity extends AppCompatActivity
 
         // We don't use a front facing camera in this sample.
         final Integer facing = characteristics.get(CameraCharacteristics.LENS_FACING);
-        if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) {
-          continue;
-        }
+        if (facing != null && facing == CameraCharacteristics.LENS_FACING_FRONT) continue;
 
         final StreamConfigurationMap map =
             characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
-        if (map == null) {
-          continue;
-        }
+        if (map == null) continue;
 
         // Fallback to camera1 API for internal cameras that don't have full support.
         // This should help with legacy situations where using the camera2 API causes
@@ -357,9 +338,7 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
   protected void readyForNextImage() {
-    if (postInferenceCallback != null) {
-      postInferenceCallback.run();
-    }
+    if (postInferenceCallback != null) postInferenceCallback.run();
   }
 
   protected int getScreenOrientation() {
