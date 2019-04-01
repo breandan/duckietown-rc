@@ -184,7 +184,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
                 }
             }
 
-            tracker!!.trackResults(mappedRecognitions, luminanceCopy, currTimestamp)
+            tracker!!.trackResults(mappedRecognitions, luminanceCopy as ByteArray, currTimestamp)
             trackingOverlay.postInvalidate()
 
             computingDetection = false

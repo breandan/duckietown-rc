@@ -83,10 +83,10 @@ class ObjectTracker protected constructor(
 
     @Synchronized
     fun nextFrame(
-        frameData: ByteArray,
-        uvData: ByteArray,
+        frameData: ByteArray?,
+        uvData: ByteArray?,
         timestamp: Long,
-        transformationMatrix: FloatArray,
+        transformationMatrix: FloatArray?,
         updateDebugInfo: Boolean
     ) {
         if (downsampledTimestamp != timestamp) {
@@ -340,7 +340,7 @@ class ObjectTracker protected constructor(
     protected external fun getTrackedPositionNative(key: String, points: FloatArray)
 
     protected external fun nextFrameNative(
-        frameData: ByteArray, uvData: ByteArray, timestamp: Long, frameAlignMatrix: FloatArray
+        frameData: ByteArray?, uvData: ByteArray?, timestamp: Long, frameAlignMatrix: FloatArray?
     )
 
     protected external fun releaseMemoryNative()
@@ -358,7 +358,7 @@ class ObjectTracker protected constructor(
 
     protected external fun getKeypointsNative(onlyReturnCorrespondingKeypoints: Boolean): FloatArray
 
-    protected external fun drawNative(viewWidth: Int, viewHeight: Int, frameToCanvas: FloatArray)
+    protected external fun drawNative(viewWidth: Int, viewHeight: Int, frameToCanvas: FloatArray?)
 
     private class TimestampedDeltas(internal val timestamp: Long, internal val deltas: ByteArray)
 
@@ -632,7 +632,7 @@ class ObjectTracker protected constructor(
         private fun floatToChar(value: Float) = Math.max(0, Math.min((value * 255.999f).toInt(), 255))
 
         protected external fun downsampleImageNative(
-            width: Int, height: Int, rowStride: Int, input: ByteArray, factor: Int, output: ByteArray
+            width: Int, height: Int, rowStride: Int, input: ByteArray?, factor: Int, output: ByteArray?
         )
     }
 }
