@@ -117,7 +117,7 @@ public abstract class CameraActivity extends AppCompatActivity
     yuvBytes[0] = bytes;
     yRowStride = previewWidth;
 
-    imageConverter = () -> ImageUtils.convertYUV420SPToARGB8888(bytes, previewWidth, previewHeight, rgbBytes);
+    imageConverter = () -> ImageUtils.INSTANCE.convertYUV420SPToARGB8888(bytes, previewWidth, previewHeight, rgbBytes);
 
     postInferenceCallback = () -> {
         camera.addCallbackBuffer(bytes);
@@ -151,7 +151,7 @@ public abstract class CameraActivity extends AppCompatActivity
       final int uvPixelStride = planes[1].getPixelStride();
 
       imageConverter =
-              () -> ImageUtils.convertYUV420ToARGB8888(
+              () -> ImageUtils.INSTANCE.convertYUV420ToARGB8888(
                   yuvBytes[0],
                   yuvBytes[1],
                   yuvBytes[2],

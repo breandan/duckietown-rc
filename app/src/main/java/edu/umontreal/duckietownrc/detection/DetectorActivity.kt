@@ -150,7 +150,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
         val canvas = Canvas(croppedBitmap!!)
         canvas.drawBitmap(rgbFrameBitmap!!, frameToCropTransform!!, null)
         // For examining the actual TF input.
-        if (SAVE_PREVIEW_BITMAP) ImageUtils.saveBitmap(croppedBitmap)
+        if (SAVE_PREVIEW_BITMAP) ImageUtils.saveBitmap(croppedBitmap as Bitmap)
 
         runInBackground {
             LOGGER.i("Running detection on image $currTimestamp")
