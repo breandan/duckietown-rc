@@ -177,7 +177,11 @@ object ImageUtils {
             for (i in 0 until width) {
                 val uv_offset = pUV + (i shr 1) * uvPixelStride
 
-                out[yp++] = YUV2RGB(0xff and yData[pY + i].toInt(), 0xff and uData[uv_offset].toInt(), 0xff and vData[uv_offset].toInt())
+                out[yp++] = YUV2RGB(
+                    0xff and yData[pY + i].toInt(),
+                    0xff and uData[uv_offset].toInt(),
+                    0xff and vData[uv_offset].toInt()
+                )
             }
         }
     }

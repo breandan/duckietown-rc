@@ -21,27 +21,8 @@ import java.io.Serializable
 import java.util.*
 
 /** Size class independent of a Camera object.  */
-class Size : Comparable<Size>, Serializable {
-    val width: Int
-    val height: Int
-
-    constructor(width: Int, height: Int) {
-        this.width = width
-        this.height = height
-    }
-
-    constructor(bmp: Bitmap) {
-        this.width = bmp.width
-        this.height = bmp.height
-    }
-
-    fun aspectRatio(): Float {
-        return width.toFloat() / height.toFloat()
-    }
-
-    override fun compareTo(other: Size): Int {
-        return width * height - other.width * other.height
-    }
+class Size(val width: Int, val height: Int) : Comparable<Size>, Serializable {
+    override fun compareTo(other: Size) = width * height - other.width * other.height
 
     override fun equals(other: Any?): Boolean {
         if (other == null) return false
@@ -52,68 +33,7 @@ class Size : Comparable<Size>, Serializable {
         return width == otherSize!!.width && height == otherSize.height
     }
 
-    override fun hashCode(): Int {
-        return width * 32713 + height
-    }
+    override fun hashCode() = width * 32713 + height
 
-    override fun toString(): String {
-        return dimensionsAsString(width, height)
-    }
-
-    companion object {
-
-        // 1.4 went out with this UID so we'll need to maintain it to preserve pending queries when
-        // upgrading.
-        const val serialVersionUID = 7689808733290872361L
-
-        /**
-         * Rotate a size by the given number of degrees.
-         *
-         * @param size Size to rotate.
-         * @param rotation Degrees {0, 90, 180, 270} to rotate the size.
-         * @return Rotated size.
-         */
-        fun getRotatedSize(size: Size, rotation: Int) =
-            if (rotation % 180 != 0) Size(size.height, size.width) else size
-
-        fun parseFromString(sizeString: String): Size? {
-            var sizeString = sizeString
-            if (TextUtils.isEmpty(sizeString)) return null
-
-            sizeString = sizeString.trim { it <= ' ' }
-
-            // The expected format is "<width>x<height>".
-            val components = sizeString.split("x".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-            return if (components.size == 2) try {
-                val width = Integer.parseInt(components[0])
-                val height = Integer.parseInt(components[1])
-                Size(width, height)
-            } catch (e: NumberFormatException) {
-                null
-            } else null
-        }
-
-        fun sizeStringToList(sizes: String?): List<Size> {
-            val sizeList = ArrayList<Size>()
-            if (sizes != null) {
-                val pairs = sizes.split(",".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                for (pair in pairs) {
-                    val size = Size.parseFromString(pair)
-                    if (size != null) sizeList.add(size)
-                }
-            }
-            return sizeList
-        }
-
-        fun sizeListToString(sizes: List<Size>?): String {
-            var sizesString = ""
-            if (sizes != null && sizes.size > 0) {
-                sizesString = sizes[0].toString()
-                for (i in 1 until sizes.size) sizesString += "," + sizes[i].toString()
-            }
-            return sizesString
-        }
-
-        fun dimensionsAsString(width: Int, height: Int) = "$width x $height"
-    }
+    override fun toString() = "$width x $height"
 }

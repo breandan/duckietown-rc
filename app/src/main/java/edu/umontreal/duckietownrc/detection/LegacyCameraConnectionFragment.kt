@@ -38,6 +38,7 @@ class LegacyCameraConnectionFragment(
     /** The layout identifier to inflate for this Fragment.  */
     private val layout: Int, private val desiredSize: Size
 ) : Fragment() {
+    private val LOGGER = Logger()
 
     private var camera: Camera? = null
     /** An [AutoFitTextureView] for camera preview.  */
@@ -156,15 +157,4 @@ class LegacyCameraConnectionFragment(
             camera = null
         }
     }
-
-        private val LOGGER = Logger()
-        /** Conversion from screen rotation to JPEG orientation.  */
-        private val ORIENTATIONS = SparseIntArray()
-
-    init {
-            ORIENTATIONS.append(Surface.ROTATION_0, 90)
-            ORIENTATIONS.append(Surface.ROTATION_90, 0)
-            ORIENTATIONS.append(Surface.ROTATION_180, 270)
-            ORIENTATIONS.append(Surface.ROTATION_270, 180)
-        }
 }

@@ -64,6 +64,28 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
 
     private var borderedText: BorderedText? = null
 
+    // Which detection model to use: by default uses Tensorflow Object Detection API frozen
+    // checkpoints.
+    private enum class DetectorMode { TF_OD_API }
+
+    private val LOGGER = Logger()
+
+    // Configuration values for the prepackaged SSD model.
+    private val TF_OD_API_INPUT_SIZE = 300
+    private val TF_OD_API_IS_QUANTIZED = true
+    private val TF_OD_API_MODEL_FILE = "detect.tflite"
+    private val TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt"
+    private val MODE = DetectorMode.TF_OD_API
+    // Minimum detection confidence to track a detection.
+    private val MINIMUM_CONFIDENCE_TF_OD_API = 0.4f
+    private val MAINTAIN_ASPECT = false
+    private val DESIRED_PREVIEW_SIZE = Size(640, 480)
+    private val SAVE_PREVIEW_BITMAP = false
+    private val TEXT_SIZE_DIP = 10f
+
+    override val layoutId = R.layout.camera_connection_fragment_tracking
+    override val desiredPreviewFrameSize = DESIRED_PREVIEW_SIZE
+
     public override fun onPreviewSizeChosen(size: Size, rotation: Int) {
         val textSizePx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, resources.displayMetrics)
         borderedText = BorderedText(textSizePx)
@@ -190,26 +212,4 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
             computingDetection = false
         })
     }
-
-    // Which detection model to use: by default uses Tensorflow Object Detection API frozen
-    // checkpoints.
-    private enum class DetectorMode { TF_OD_API }
-
-    private val LOGGER = Logger()
-
-    // Configuration values for the prepackaged SSD model.
-    private val TF_OD_API_INPUT_SIZE = 300
-    private val TF_OD_API_IS_QUANTIZED = true
-    private val TF_OD_API_MODEL_FILE = "detect.tflite"
-    private val TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt"
-    private val MODE = DetectorMode.TF_OD_API
-    // Minimum detection confidence to track a detection.
-    private val MINIMUM_CONFIDENCE_TF_OD_API = 0.4f
-    private val MAINTAIN_ASPECT = false
-    private val DESIRED_PREVIEW_SIZE = Size(640, 480)
-    private val SAVE_PREVIEW_BITMAP = false
-    private val TEXT_SIZE_DIP = 10f
-
-    override val layoutId = R.layout.camera_connection_fragment_tracking
-    override val desiredPreviewFrameSize = DESIRED_PREVIEW_SIZE
 }

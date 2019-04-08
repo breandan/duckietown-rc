@@ -56,6 +56,13 @@ abstract class CameraActivity : AppCompatActivity(), OnImageAvailableListener, C
     private var postInferenceCallback: Runnable? = null
     protected var imageConverter: Runnable? = null
 
+    private val LOGGER = Logger()
+
+    private val PERMISSIONS_REQUEST = 1
+
+    private val PERMISSION_CAMERA = Manifest.permission.CAMERA
+
+
     protected val luminance: ByteArray
         get() = yuvBytes[0]!!
 
@@ -335,12 +342,4 @@ abstract class CameraActivity : AppCompatActivity(), OnImageAvailableListener, C
     protected abstract fun processImage()
 
     protected abstract fun onPreviewSizeChosen(size: Size, rotation: Int)
-
-    companion object {
-        private val LOGGER = Logger()
-
-        private val PERMISSIONS_REQUEST = 1
-
-        private val PERMISSION_CAMERA = Manifest.permission.CAMERA
-    }
 }

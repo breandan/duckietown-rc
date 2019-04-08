@@ -22,18 +22,24 @@ import android.graphics.Paint.Style
 import android.graphics.Typeface
 
 /** A class that encapsulates the tedious bits of rendering legible, bordered text onto a canvas.  */
-class BorderedText
-/**
- * Create a bordered text object with the specified interior and exterior colors, text size and
- * alignment.
- *
- * @param interiorColor the interior text color
- * @param exteriorColor the exterior text color
- * @param textSize text size in pixels
- */
-    (interiorColor: Int, exteriorColor: Int, val textSize: Float) {
-    private val interiorPaint: Paint
-    private val exteriorPaint: Paint
+class BorderedText(interiorColor: Int, exteriorColor: Int, val textSize: Float) {
+    private val interiorPaint: Paint = Paint().apply {
+        textSize = this@BorderedText.textSize
+        color = interiorColor
+        style = Style.FILL
+        isAntiAlias = false
+        alpha = 255
+
+    }
+
+    private val exteriorPaint: Paint = Paint().apply {
+        textSize = this@BorderedText.textSize
+        color = exteriorColor
+        style = Style.FILL_AND_STROKE
+        strokeWidth = this@BorderedText.textSize / 8
+        isAntiAlias = false
+        alpha = 255
+    }
 
     /**
      * Creates a left-aligned bordered text object with a white interior, and a black exterior with
@@ -41,24 +47,7 @@ class BorderedText
      *
      * @param textSize text size in pixels
      */
-    constructor(textSize: Float) : this(Color.WHITE, Color.BLACK, textSize) {}
-
-    init {
-        interiorPaint = Paint()
-        interiorPaint.textSize = textSize
-        interiorPaint.color = interiorColor
-        interiorPaint.style = Style.FILL
-        interiorPaint.isAntiAlias = false
-        interiorPaint.alpha = 255
-
-        exteriorPaint = Paint()
-        exteriorPaint.textSize = textSize
-        exteriorPaint.color = exteriorColor
-        exteriorPaint.style = Style.FILL_AND_STROKE
-        exteriorPaint.strokeWidth = textSize / 8
-        exteriorPaint.isAntiAlias = false
-        exteriorPaint.alpha = 255
-    }
+    constructor(textSize: Float) : this(Color.WHITE, Color.BLACK, textSize)
 
     fun setTypeface(typeface: Typeface) {
         interiorPaint.typeface = typeface
@@ -70,9 +59,7 @@ class BorderedText
         canvas.drawText(text, posX, posY, interiorPaint)
     }
 
-    fun drawText(
-        canvas: Canvas, posX: Float, posY: Float, text: String, bgPaint: Paint
-    ) {
+    fun drawText(canvas: Canvas, posX: Float, posY: Float, text: String, bgPaint: Paint) {
 
         val width = exteriorPaint.measureText(text)
         val textSize = exteriorPaint.textSize
@@ -83,5 +70,4 @@ class BorderedText
 
         canvas.drawText(text, posX, posY + textSize, interiorPaint)
     }
-
 }

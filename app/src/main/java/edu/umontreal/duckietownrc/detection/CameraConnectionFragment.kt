@@ -27,6 +27,7 @@ import android.graphics.Matrix
 import android.graphics.RectF
 import android.graphics.SurfaceTexture
 import android.hardware.camera2.*
+import android.hardware.camera2.CaptureRequest.*
 import android.media.ImageReader
 import android.media.ImageReader.OnImageAvailableListener
 import android.os.Bundle
@@ -281,6 +282,32 @@ class CameraConnectionFragment private constructor(
         }
     }
 
+    val previewStateCallback = object : CameraCaptureSession.StateCallback() {
+        override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
+            // The camera is already closed
+            if (null == cameraDevice) return
+
+            // When the session is ready, we start displaying the preview.
+            captureSession = cameraCaptureSession
+            try {
+                // Auto focus should be continuous for camera preview.
+                previewRequestBuilder!!.set(CONTROL_AF_MODE, CONTROL_AF_MODE_CONTINUOUS_PICTURE)
+                // Flash is automatically enabled when necessary.
+                previewRequestBuilder!!.set(CONTROL_AE_MODE, CONTROL_AE_MODE_ON_AUTO_FLASH)
+
+                // Finally, we start displaying the camera preview.
+                previewRequest = previewRequestBuilder!!.build()
+                captureSession!!.setRepeatingRequest(
+                    previewRequest!!, captureCallback, backgroundHandler
+                )
+            } catch (e: CameraAccessException) {
+                LOGGER.e(e, "Exception!")
+            }
+        }
+
+        override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) = showToast("Failed")
+    }
+
     /** Creates a new [CameraCaptureSession] for camera preview.  */
     private fun createCameraPreviewSession() {
         try {
@@ -308,45 +335,11 @@ class CameraConnectionFragment private constructor(
 
             // Here, we create a CameraCaptureSession for camera preview.
             cameraDevice!!.createCaptureSession(
-                Arrays.asList(surface, previewReader!!.surface),
-                object : CameraCaptureSession.StateCallback() {
-
-                    override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
-                        // The camera is already closed
-                        if (null == cameraDevice) return
-
-                        // When the session is ready, we start displaying the preview.
-                        captureSession = cameraCaptureSession
-                        try {
-                            // Auto focus should be continuous for camera preview.
-                            previewRequestBuilder!!.set(
-                                CaptureRequest.CONTROL_AF_MODE,
-                                CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE
-                            )
-                            // Flash is automatically enabled when necessary.
-                            previewRequestBuilder!!.set(
-                                CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH
-                            )
-
-                            // Finally, we start displaying the camera preview.
-                            previewRequest = previewRequestBuilder!!.build()
-                            captureSession!!.setRepeatingRequest(
-                                previewRequest!!, captureCallback, backgroundHandler
-                            )
-                        } catch (e: CameraAccessException) {
-                            LOGGER.e(e, "Exception!")
-                        }
-                    }
-
-                    override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
-                        showToast("Failed")
-                    }
-                }, null
+                Arrays.asList(surface, previewReader!!.surface), previewStateCallback, null
             )
         } catch (e: CameraAccessException) {
             LOGGER.e(e, "Exception!")
         }
-
     }
 
     /**
@@ -428,19 +421,7 @@ class CameraConnectionFragment private constructor(
          */
         private val MINIMUM_PREVIEW_SIZE = 320
 
-        /** Conversion from screen rotation to JPEG orientation.  */
-        private val ORIENTATIONS = SparseIntArray()
-
         private val FRAGMENT_DIALOG = "dialog"
-
-        init {
-            ORIENTATIONS.run {
-                append(Surface.ROTATION_0, 90)
-                append(Surface.ROTATION_90, 0)
-                append(Surface.ROTATION_180, 270)
-                append(Surface.ROTATION_270, 180)
-            }
-        }
 
         /**
          * Given `choices` of `Size`s supported by a camera, chooses the smallest one whose

@@ -25,14 +25,10 @@ import java.util.*
 class OverlayView(context: Context, attrs: AttributeSet) : View(context, attrs) {
     private val callbacks = LinkedList<DrawCallback>()
 
-    fun addCallback(callback: DrawCallback) {
-        callbacks.add(callback)
-    }
+    fun addCallback(callback: DrawCallback) = callbacks.add(callback)
 
     @Synchronized
-    override fun draw(canvas: Canvas) {
-        for (callback in callbacks) callback.drawCallback(canvas)
-    }
+    override fun draw(canvas: Canvas) = callbacks.forEach { it.drawCallback(canvas) }
 
     /** Interface defining the callback for client classes.  */
     interface DrawCallback {

@@ -34,13 +34,53 @@ import java.util.LinkedList
 import java.util.Queue
 
 class MultiBoxTracker(private val context: Context) {
+
+    private val TEXT_SIZE_DIP = 18f
+    // Maximum percentage of a box that can be overlapped by another box at detection time. Otherwise
+    // the lower scored box (new or old) will be removed.
+    private val MAX_OVERLAP = 0.2f
+    private val MIN_SIZE = 16.0f
+    // Allow replacement of the tracked box with new results if
+    // correlation has dropped below this level.
+    private val MARGINAL_CORRELATION = 0.75f
+    // Consider object to be lost if correlation falls below this threshold.
+    private val MIN_CORRELATION = 0.3f
+    private val COLORS = intArrayOf(
+        BLUE,
+        RED,
+        GREEN,
+        YELLOW,
+        CYAN,
+        MAGENTA,
+        WHITE,
+        parseColor("#55FF55"),
+        parseColor("#FFA500"),
+        parseColor("#FF8888"),
+        parseColor("#AAAAFF"),
+        parseColor("#FFFFAA"),
+        parseColor("#55AAAA"),
+        parseColor("#AA33AA"),
+        parseColor("#0D0068")
+    )
+
     internal val screenRects: MutableList<Pair<Float, RectF>> = LinkedList()
     private val logger = Logger()
-    private val availableColors = LinkedList<Int>()
+    private val availableColors = LinkedList<Int>(COLORS.asList())
     private val trackedObjects = LinkedList<TrackedRecognition>()
-    private val boxPaint = Paint()
-    private val textSizePx: Float
-    private val borderedText: BorderedText
+    private val boxPaint = Paint().apply {
+        color = RED
+        style = Style.STROKE
+        strokeWidth = 10.0f
+        strokeCap = Cap.ROUND
+        strokeJoin = Join.ROUND
+        strokeMiter = 100f
+    }
+
+    private val textSizePx: Float = TypedValue.applyDimension(
+        TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.resources.displayMetrics
+    )
+
+    private val borderedText = BorderedText(textSizePx)
     private var objectTracker: ObjectTracker? = null
     private var frameToCanvasMatrix: Matrix? = null
     private var frameWidth: Int = 0
@@ -48,32 +88,17 @@ class MultiBoxTracker(private val context: Context) {
     private var sensorOrientation: Int = 0
     private var initialized = false
 
-    init {
-        for (color in COLORS) availableColors.add(color)
-
-        boxPaint.color = RED
-        boxPaint.style = Style.STROKE
-        boxPaint.strokeWidth = 10.0f
-        boxPaint.strokeCap = Cap.ROUND
-        boxPaint.strokeJoin = Join.ROUND
-        boxPaint.strokeMiter = 100f
-
-        textSizePx = TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.resources.displayMetrics
-        )
-        borderedText = BorderedText(textSizePx)
-    }
-
     @Synchronized
     fun drawDebug(canvas: Canvas) {
         val textPaint = Paint()
         textPaint.color = WHITE
         textPaint.textSize = 60.0f
 
-        val boxPaint = Paint()
-        boxPaint.color = RED
-        boxPaint.alpha = 200
-        boxPaint.style = Style.STROKE
+        val boxPaint = Paint().apply {
+            color = RED
+            alpha = 200
+            style = Style.STROKE
+        }
 
         for (detection in screenRects) {
             val rect = detection.second
@@ -351,35 +376,5 @@ class MultiBoxTracker(private val context: Context) {
         internal var detectionConfidence: Float = 0.toFloat()
         internal var color: Int = 0
         internal var title: String? = null
-    }
-
-    companion object {
-        private val TEXT_SIZE_DIP = 18f
-        // Maximum percentage of a box that can be overlapped by another box at detection time. Otherwise
-        // the lower scored box (new or old) will be removed.
-        private val MAX_OVERLAP = 0.2f
-        private val MIN_SIZE = 16.0f
-        // Allow replacement of the tracked box with new results if
-        // correlation has dropped below this level.
-        private val MARGINAL_CORRELATION = 0.75f
-        // Consider object to be lost if correlation falls below this threshold.
-        private val MIN_CORRELATION = 0.3f
-        private val COLORS = intArrayOf(
-            BLUE,
-            RED,
-            GREEN,
-            YELLOW,
-            CYAN,
-            MAGENTA,
-            WHITE,
-            parseColor("#55FF55"),
-            parseColor("#FFA500"),
-            parseColor("#FF8888"),
-            parseColor("#AAAAFF"),
-            parseColor("#FFFFAA"),
-            parseColor("#55AAAA"),
-            parseColor("#AA33AA"),
-            parseColor("#0D0068")
-        )
     }
 }

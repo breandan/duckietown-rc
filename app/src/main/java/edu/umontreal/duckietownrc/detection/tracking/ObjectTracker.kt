@@ -231,7 +231,10 @@ class ObjectTracker protected constructor(
         if (lastTimestamp == 0L) return
 
         val delta = getAccumulatedDelta(
-            lastTimestamp, (frameWidth / DOWNSAMPLE_FACTOR).toFloat(), (frameHeight / DOWNSAMPLE_FACTOR).toFloat(), 100f
+            lastTimestamp,
+            (frameWidth / DOWNSAMPLE_FACTOR).toFloat(),
+            (frameHeight / DOWNSAMPLE_FACTOR).toFloat(),
+            100f
         )
 
         synchronized(debugHistory) {
@@ -410,6 +413,7 @@ class ObjectTracker protected constructor(
 
         val minScore: Float
         val maxScore: Float
+        val KEYPOINT_STEP = 7
 
         init {
             var minScore = 100.0f
@@ -438,10 +442,6 @@ class ObjectTracker protected constructor(
 
             this.minScore = minScore
             this.maxScore = maxScore
-        }
-
-        companion object {
-            val KEYPOINT_STEP = 7
         }
     }
 
