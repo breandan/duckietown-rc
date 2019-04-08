@@ -17,6 +17,7 @@ package edu.umontreal.duckietownrc.detection.tracking
 
 import android.content.Context
 import android.graphics.*
+import android.graphics.Color.*
 import android.graphics.Paint.Cap
 import android.graphics.Paint.Join
 import android.graphics.Paint.Style
@@ -50,7 +51,7 @@ class MultiBoxTracker(private val context: Context) {
     init {
         for (color in COLORS) availableColors.add(color)
 
-        boxPaint.color = Color.RED
+        boxPaint.color = RED
         boxPaint.style = Style.STROKE
         boxPaint.strokeWidth = 10.0f
         boxPaint.strokeCap = Cap.ROUND
@@ -66,11 +67,11 @@ class MultiBoxTracker(private val context: Context) {
     @Synchronized
     fun drawDebug(canvas: Canvas) {
         val textPaint = Paint()
-        textPaint.color = Color.WHITE
+        textPaint.color = WHITE
         textPaint.textSize = 60.0f
 
         val boxPaint = Paint()
-        boxPaint.color = Color.RED
+        boxPaint.color = RED
         boxPaint.alpha = 200
         boxPaint.style = Style.STROKE
 
@@ -163,13 +164,6 @@ class MultiBoxTracker(private val context: Context) {
             frameHeight = h
             this.sensorOrientation = sensorOrientation
             initialized = true
-
-            if (objectTracker == null) {
-                val message =
-                    "Object tracking support not found. " + "See tensorflow/examples/android/README.md for details."
-                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
-                logger.e(message)
-            }
         }
 
         if (objectTracker == null) return
@@ -191,9 +185,7 @@ class MultiBoxTracker(private val context: Context) {
         }
     }
 
-    private fun processResults(
-        timestamp: Long, results: List<Recognition>, originalFrame: ByteArray
-    ) {
+    private fun processResults(timestamp: Long, results: List<Recognition>, originalFrame: ByteArray) {
         val rectsToTrack = LinkedList<Pair<Float, Recognition>>()
 
         screenRects.clear()
@@ -373,21 +365,21 @@ class MultiBoxTracker(private val context: Context) {
         // Consider object to be lost if correlation falls below this threshold.
         private val MIN_CORRELATION = 0.3f
         private val COLORS = intArrayOf(
-            Color.BLUE,
-            Color.RED,
-            Color.GREEN,
-            Color.YELLOW,
-            Color.CYAN,
-            Color.MAGENTA,
-            Color.WHITE,
-            Color.parseColor("#55FF55"),
-            Color.parseColor("#FFA500"),
-            Color.parseColor("#FF8888"),
-            Color.parseColor("#AAAAFF"),
-            Color.parseColor("#FFFFAA"),
-            Color.parseColor("#55AAAA"),
-            Color.parseColor("#AA33AA"),
-            Color.parseColor("#0D0068")
+            BLUE,
+            RED,
+            GREEN,
+            YELLOW,
+            CYAN,
+            MAGENTA,
+            WHITE,
+            parseColor("#55FF55"),
+            parseColor("#FFA500"),
+            parseColor("#FF8888"),
+            parseColor("#AAAAFF"),
+            parseColor("#FFFFAA"),
+            parseColor("#55AAAA"),
+            parseColor("#AA33AA"),
+            parseColor("#0D0068")
         )
     }
 }

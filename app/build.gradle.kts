@@ -13,7 +13,7 @@ android {
     buildToolsVersion("28.0.3")
 
     defaultConfig {
-        minSdkVersion(21)
+        minSdkVersion(23)
         targetSdkVersion(28)
         versionCode = 2
         versionName = "1.0"
@@ -70,7 +70,7 @@ val kotlinVersion = ext.get("kotlinVersion") as String
 dependencies {
     implementation("com.github.rosjava.android_remocons:common_tools:[0.3,0.4)")
     implementation("org.ros.android_core:android_core_components:[0.4,0.5)")
-    implementation("com.android.support:appcompat-v7:28.0.0")
+    implementation("com.android.support:appcompat-v7:27.1.1")
     implementation("org.tensorflow:tensorflow-lite:0.0.0-nightly")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion")

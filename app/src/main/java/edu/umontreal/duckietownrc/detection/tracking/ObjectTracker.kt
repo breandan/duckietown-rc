@@ -124,18 +124,19 @@ class ObjectTracker protected constructor(
     }
 
     private fun drawHistoryPoint(canvas: Canvas, startX: Float, startY: Float) {
-        val p = Paint()
-        p.isAntiAlias = false
-        p.typeface = Typeface.SERIF
+        val paint = Paint().apply {
+            isAntiAlias = false
+            typeface = Typeface.SERIF
 
-        p.color = Color.RED
-        p.strokeWidth = 2.0f
+            color = Color.RED
+            strokeWidth = 2.0f
 
-        // Draw the center circle.
-        p.color = Color.GREEN
-        canvas.drawCircle(startX, startY, 3.0f, p)
+            // Draw the center circle.
+            color = Color.GREEN
+            canvas.drawCircle(startX, startY, 3.0f, this)
 
-        p.color = Color.RED
+            color = Color.RED
+        }
 
         // Iterate through in backwards order.
         synchronized(debugHistory) {
@@ -146,7 +147,7 @@ class ObjectTracker protected constructor(
                 val delta = debugHistory[numPoints - keypointNum - 1]
                 val newX = lastX + delta.x
                 val newY = lastY + delta.y
-                canvas.drawLine(lastX, lastY, newX, newY, p)
+                canvas.drawLine(lastX, lastY, newX, newY, paint)
                 lastX = newX
                 lastY = newY
             }
@@ -154,7 +155,7 @@ class ObjectTracker protected constructor(
     }
 
     private fun drawKeypointsDebug(canvas: Canvas) {
-        val p = Paint()
+        val paint = Paint()
         if (lastKeypoints == null) return
         val keypointSize = 3
 
@@ -167,7 +168,7 @@ class ObjectTracker protected constructor(
                 val b = floatToChar(1.0f - (keypoint.keypointA.score - minScore) / (maxScore - minScore))
 
                 val color = -0x1000000 or (r shl 16) or b
-                p.color = color
+                paint.color = color
 
                 val screenPoints =
                     floatArrayOf(keypoint.keypointA.x, keypoint.keypointA.y, keypoint.keypointB.x, keypoint.keypointB.y)
@@ -176,40 +177,34 @@ class ObjectTracker protected constructor(
                     screenPoints[3] - keypointSize,
                     screenPoints[2] + keypointSize,
                     screenPoints[3] + keypointSize,
-                    p
+                    paint
                 )
-                p.color = Color.CYAN
-                canvas.drawLine(screenPoints[2], screenPoints[3], screenPoints[0], screenPoints[1], p)
+                paint.color = Color.CYAN
+                canvas.drawLine(screenPoints[2], screenPoints[3], screenPoints[0], screenPoints[1], paint)
 
                 if (DRAW_TEXT) {
-                    p.color = Color.WHITE
+                    paint.color = Color.WHITE
                     canvas.drawText(
                         keypoint.keypointA.type.toString() + ": " + keypoint.keypointA.score,
                         keypoint.keypointA.x,
                         keypoint.keypointA.y,
-                        p
+                        paint
                     )
                 }
             } else {
-                p.color = Color.YELLOW
+                paint.color = Color.YELLOW
                 val screenPoint = floatArrayOf(keypoint.keypointA.x, keypoint.keypointA.y)
-                canvas.drawCircle(screenPoint[0], screenPoint[1], 5.0f, p)
+                canvas.drawCircle(screenPoint[0], screenPoint[1], 5.0f, paint)
             }
         }
     }
 
     @Synchronized
-    private fun getAccumulatedDelta(
-        timestamp: Long, positionX: Float, positionY: Float, radius: Float
-    ): PointF {
-        val currPosition = getCurrentPosition(
+    private fun getAccumulatedDelta(timestamp: Long, positionX: Float, positionY: Float, radius: Float) =
+        getCurrentPosition(
             timestamp,
-            RectF(
-                positionX - radius, positionY - radius, positionX + radius, positionY + radius
-            )
-        )
-        return PointF(currPosition.centerX() - positionX, currPosition.centerY() - positionY)
-    }
+            RectF(positionX - radius, positionY - radius, positionX + radius, positionY + radius)
+        ).run { PointF(centerX() - positionX, centerY() - positionY) }
 
     @Synchronized
     private fun getCurrentPosition(timestamp: Long, oldPosition: RectF): RectF {
@@ -265,8 +260,7 @@ class ObjectTracker protected constructor(
             if (currentDeltas.timestamp <= endFrameTime) {
                 frameDeltas.add(currentDeltas.deltas)
                 timestampedDeltas.removeFirst()
-            } else
-                break
+            } else break
         }
 
         return frameDeltas
@@ -304,9 +298,8 @@ class ObjectTracker protected constructor(
     }
 
     @Synchronized
-    fun trackObject(position: RectF, frameData: ByteArray): TrackedObject {
-        return TrackedObject(position, lastTimestamp, frameData)
-    }
+    fun trackObject(position: RectF, frameData: ByteArray) =
+        TrackedObject(position, lastTimestamp, frameData)
 
     private external fun initNative(imageWidth: Int, imageHeight: Int, alwaysTrack: Boolean)
 

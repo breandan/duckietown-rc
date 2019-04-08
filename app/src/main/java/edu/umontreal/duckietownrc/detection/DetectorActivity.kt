@@ -24,6 +24,7 @@ import android.os.SystemClock
 import android.util.Size
 import android.util.TypedValue
 import android.widget.Toast
+import android.widget.Toast.*
 import edu.umontreal.duckietownrc.R
 import edu.umontreal.duckietownrc.detection.customview.OverlayView
 import edu.umontreal.duckietownrc.detection.env.BorderedText
@@ -84,9 +85,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
         } catch (e: IOException) {
             e.printStackTrace()
             LOGGER.e("Exception initializing classifier!", e)
-            val toast = Toast.makeText(
-                applicationContext, "Classifier could not be initialized", Toast.LENGTH_SHORT
-            )
+            val toast = makeText(applicationContext, "Classifier could not be initialized", LENGTH_SHORT)
             toast.show()
             finish()
         }
@@ -141,6 +140,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
         computingDetection = true
         LOGGER.i("Preparing image $currTimestamp for detection in bg thread.")
 
+        imageConverter!!.run()
         rgbFrameBitmap!!.setPixels(rgbBytes, 0, previewWidth, 0, 0, previewWidth, previewHeight)
 
         if (luminanceCopy == null) luminanceCopy = ByteArray(originalLuminance.size)
@@ -152,7 +152,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
         // For examining the actual TF input.
         if (SAVE_PREVIEW_BITMAP) ImageUtils.saveBitmap(croppedBitmap as Bitmap)
 
-        runInBackground {
+        runInBackground (Runnable {
             LOGGER.i("Running detection on image $currTimestamp")
             val startTime = SystemClock.uptimeMillis()
             val results = detector!!.recognizeImage(croppedBitmap!!)
@@ -188,12 +188,8 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
             trackingOverlay.postInvalidate()
 
             computingDetection = false
-        }
+        })
     }
-
-    override fun getLayoutId() = R.layout.camera_connection_fragment_tracking
-
-    override fun getDesiredPreviewFrameSize() = DESIRED_PREVIEW_SIZE
 
     // Which detection model to use: by default uses Tensorflow Object Detection API frozen
     // checkpoints.
@@ -213,4 +209,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
     private val DESIRED_PREVIEW_SIZE = Size(640, 480)
     private val SAVE_PREVIEW_BITMAP = false
     private val TEXT_SIZE_DIP = 10f
+
+    override val layoutId = R.layout.camera_connection_fragment_tracking
+    override val desiredPreviewFrameSize = DESIRED_PREVIEW_SIZE
 }

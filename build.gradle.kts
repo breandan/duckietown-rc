@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:3.5.0-alpha09")
+        classpath("com.android.tools.build:gradle:3.5.0-alpha10")
         classpath("de.undercouch:gradle-download-task:3.4.3")
 
         classpath(kotlin("gradle-plugin", version = kotlinVersion))

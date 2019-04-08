@@ -96,8 +96,8 @@ class Logger
     }
 
     companion object {
-        private val DEFAULT_TAG = "tensorflow"
-        private val DEFAULT_MIN_LOG_LEVEL = Log.DEBUG
+        private const val DEFAULT_TAG = "tensorflow"
+        private const val DEFAULT_MIN_LOG_LEVEL = Log.DEBUG
 
         // Classes to be ignored when examining the stack trace
         private val IGNORED_CLASS_NAMES: MutableSet<String>
