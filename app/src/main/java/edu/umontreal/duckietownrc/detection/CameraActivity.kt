@@ -62,7 +62,6 @@ abstract class CameraActivity : AppCompatActivity(), OnImageAvailableListener, C
 
     private val PERMISSION_CAMERA = Manifest.permission.CAMERA
 
-
     protected val luminance: ByteArray
         get() = yuvBytes[0]!!
 
@@ -92,8 +91,6 @@ abstract class CameraActivity : AppCompatActivity(), OnImageAvailableListener, C
         } else {
             requestPermission()
         }
-
-        //    apiSwitchCompat = findViewById(R.id.api_info_switch);
     }
 
     /** Callback for android.hardware.Camera API  */

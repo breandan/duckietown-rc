@@ -143,9 +143,8 @@ class CameraConnectionFragment private constructor(
      *
      * @param text The message to show
      */
-    private fun showToast(text: String) {
+    private fun showToast(text: String) =
         activity?.runOnUiThread { Toast.makeText(activity, text, Toast.LENGTH_SHORT).show() }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle
@@ -305,7 +304,9 @@ class CameraConnectionFragment private constructor(
             }
         }
 
-        override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) = showToast("Failed")
+        override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
+            showToast("Failed")
+        }
     }
 
     /** Creates a new [CameraCaptureSession] for camera preview.  */

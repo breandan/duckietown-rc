@@ -77,7 +77,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
     private val TF_OD_API_LABELS_FILE = "file:///android_asset/labelmap.txt"
     private val MODE = DetectorMode.TF_OD_API
     // Minimum detection confidence to track a detection.
-    private val MINIMUM_CONFIDENCE_TF_OD_API = 0.4f
+    private val MINIMUM_CONFIDENCE_TF_OD_API = 0.5f
     private val MAINTAIN_ASPECT = false
     private val DESIRED_PREVIEW_SIZE = Size(640, 480)
     private val SAVE_PREVIEW_BITMAP = false
@@ -174,7 +174,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
         // For examining the actual TF input.
         if (SAVE_PREVIEW_BITMAP) ImageUtils.saveBitmap(croppedBitmap as Bitmap)
 
-        runInBackground (Runnable {
+        runInBackground(Runnable {
             LOGGER.i("Running detection on image $currTimestamp")
             val startTime = SystemClock.uptimeMillis()
             val results = detector!!.recognizeImage(croppedBitmap!!)
@@ -188,9 +188,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
             paint.strokeWidth = 2.0f
 
             var minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API
-            when (MODE) {
-                DetectorActivity.DetectorMode.TF_OD_API -> minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API
-            }
+            if (MODE == DetectorActivity.DetectorMode.TF_OD_API) minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API
 
             val mappedRecognitions = LinkedList<Classifier.Recognition>()
 

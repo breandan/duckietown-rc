@@ -208,17 +208,17 @@ class ObjectTracker protected constructor(
 
     @Synchronized
     private fun getCurrentPosition(timestamp: Long, oldPosition: RectF): RectF {
-        val downscaledFrameRect = downscaleRect(oldPosition)
-
         val delta = FloatArray(4)
-        getCurrentPositionNative(
-            timestamp,
-            downscaledFrameRect.left,
-            downscaledFrameRect.top,
-            downscaledFrameRect.right,
-            downscaledFrameRect.bottom,
-            delta
-        )
+        downscaleRect(oldPosition).let {
+            getCurrentPositionNative(
+                timestamp,
+                it.left,
+                it.top,
+                it.right,
+                it.bottom,
+                delta
+            )
+        }
 
         val newPosition = RectF(delta[0], delta[1], delta[2], delta[3])
 
@@ -269,28 +269,22 @@ class ObjectTracker protected constructor(
         return frameDeltas
     }
 
-    private fun downscaleRect(fullFrameRect: RectF): RectF {
-        return RectF(
-            fullFrameRect.left / DOWNSAMPLE_FACTOR,
-            fullFrameRect.top / DOWNSAMPLE_FACTOR,
-            fullFrameRect.right / DOWNSAMPLE_FACTOR,
-            fullFrameRect.bottom / DOWNSAMPLE_FACTOR
-        )
-    }
+    private fun downscaleRect(fullFrameRect: RectF) = RectF(
+        fullFrameRect.left / DOWNSAMPLE_FACTOR,
+        fullFrameRect.top / DOWNSAMPLE_FACTOR,
+        fullFrameRect.right / DOWNSAMPLE_FACTOR,
+        fullFrameRect.bottom / DOWNSAMPLE_FACTOR
+    )
 
-    private fun upscaleRect(downsampledFrameRect: RectF): RectF {
-        return RectF(
-            downsampledFrameRect.left * DOWNSAMPLE_FACTOR,
-            downsampledFrameRect.top * DOWNSAMPLE_FACTOR,
-            downsampledFrameRect.right * DOWNSAMPLE_FACTOR,
-            downsampledFrameRect.bottom * DOWNSAMPLE_FACTOR
-        )
-    }
+    private fun upscaleRect(downsampledFrameRect: RectF) = RectF(
+        downsampledFrameRect.left * DOWNSAMPLE_FACTOR,
+        downsampledFrameRect.top * DOWNSAMPLE_FACTOR,
+        downsampledFrameRect.right * DOWNSAMPLE_FACTOR,
+        downsampledFrameRect.bottom * DOWNSAMPLE_FACTOR
+    )
 
     @Synchronized
-    fun trackObject(
-        position: RectF, timestamp: Long, frameData: ByteArray
-    ): TrackedObject {
+    fun trackObject(position: RectF, timestamp: Long, frameData: ByteArray): TrackedObject {
         if (downsampledTimestamp != timestamp) {
             ObjectTracker.downsampleImageNative(
                 frameWidth, frameHeight, rowStride, frameData, DOWNSAMPLE_FACTOR, downsampledFrame
@@ -454,10 +448,10 @@ class ObjectTracker protected constructor(
      * @author andrewharp@google.com (Andrew Harp)
      */
     inner class TrackedObject internal constructor(position: RectF, timestamp: Long, data: ByteArray) {
-        private val id: String
+        private val id: String = Integer.toString(hashCode())
 
         @get:Synchronized
-        internal var lastExternalPositionTime: Long = 0
+        internal var lastExternalPositionTime: Long = timestamp
             private set
 
         private var lastTrackedPosition: RectF? = null
@@ -479,12 +473,6 @@ class ObjectTracker protected constructor(
             }
 
         init {
-            isDead = false
-
-            id = Integer.toString(this.hashCode())
-
-            lastExternalPositionTime = timestamp
-
             synchronized(this@ObjectTracker) {
                 registerInitialAppearance(position, data)
                 setPreviousPosition(position, timestamp)
@@ -503,15 +491,9 @@ class ObjectTracker protected constructor(
         }
 
         internal fun registerInitialAppearance(position: RectF, data: ByteArray) {
-            val externalPosition = downscaleRect(position)
-            registerNewObjectWithAppearanceNative(
-                id,
-                externalPosition.left,
-                externalPosition.top,
-                externalPosition.right,
-                externalPosition.bottom,
-                data
-            )
+            downscaleRect(position).let {
+                registerNewObjectWithAppearanceNative(id, it.left, it.top, it.right, it.bottom, data)
+            }
         }
 
         @Synchronized
@@ -522,17 +504,12 @@ class ObjectTracker protected constructor(
                     LOGGER.w("Tried to use older position time!")
                     return
                 }
-                val externalPosition = downscaleRect(position)
+
                 lastExternalPositionTime = timestamp
 
-                setPreviousPositionNative(
-                    id,
-                    externalPosition.left,
-                    externalPosition.top,
-                    externalPosition.right,
-                    externalPosition.bottom,
-                    lastExternalPositionTime
-                )
+                downscaleRect(position).let {
+                    setPreviousPositionNative(id, it.left, it.top, it.right, it.bottom, lastExternalPositionTime)
+                }
 
                 updateTrackedPosition()
             }
@@ -540,15 +517,8 @@ class ObjectTracker protected constructor(
 
         internal fun setCurrentPosition(position: RectF) {
             checkValidObject()
-            val downsampledPosition = downscaleRect(position)
             synchronized(this@ObjectTracker) {
-                setCurrentPositionNative(
-                    id,
-                    downsampledPosition.left,
-                    downsampledPosition.top,
-                    downsampledPosition.right,
-                    downsampledPosition.bottom
-                )
+                downscaleRect(position).let { setCurrentPositionNative(id, it.left, it.top, it.right, it.bottom) }
             }
         }
 
@@ -562,9 +532,6 @@ class ObjectTracker protected constructor(
 
             visibleInLastFrame = isObjectVisible(id)
         }
-
-        @Synchronized
-        fun visibleInLastPreviewFrame() = visibleInLastFrame
 
         private fun checkValidObject() {
             if (isDead)
@@ -602,9 +569,7 @@ class ObjectTracker protected constructor(
         }
 
         @Synchronized
-        fun getInstance(
-            frameWidth: Int, frameHeight: Int, rowStride: Int, alwaysTrack: Boolean
-        ): ObjectTracker? {
+        fun getInstance(frameWidth: Int, frameHeight: Int, rowStride: Int, alwaysTrack: Boolean): ObjectTracker? {
             if (!libraryFound) {
                 LOGGER.e("Native object tracking support not found. See tensorflow/examples/android/README.md for details.")
                 return null
@@ -624,7 +589,7 @@ class ObjectTracker protected constructor(
 
         private fun floatToChar(value: Float) = Math.max(0, Math.min((value * 255.999f).toInt(), 255))
 
-        protected external fun downsampleImageNative(
+        private external fun downsampleImageNative(
             width: Int, height: Int, rowStride: Int, input: ByteArray?, factor: Int, output: ByteArray?
         )
     }
