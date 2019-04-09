@@ -93,8 +93,6 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
 
         tracker = MultiBoxTracker(this)
 
-        var cropSize = TF_OD_API_INPUT_SIZE
-
         try {
             detector = TFLiteObjectDetectionAPIModel.create(
                 assets,
@@ -103,12 +101,10 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
                 TF_OD_API_INPUT_SIZE,
                 TF_OD_API_IS_QUANTIZED
             )
-            cropSize = TF_OD_API_INPUT_SIZE
         } catch (e: IOException) {
             e.printStackTrace()
             LOGGER.e("Exception initializing classifier!", e)
-            val toast = makeText(applicationContext, "Classifier could not be initialized", LENGTH_SHORT)
-            toast.show()
+            makeText(applicationContext, "Classifier could not be initialized", LENGTH_SHORT).show()
             finish()
         }
 
@@ -120,11 +116,11 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
 
         LOGGER.i("Initializing at size %dx%d", previewWidth, previewHeight)
         rgbFrameBitmap = Bitmap.createBitmap(previewWidth, previewHeight, Config.ARGB_8888)
-        croppedBitmap = Bitmap.createBitmap(cropSize, cropSize, Config.ARGB_8888)
+        croppedBitmap = Bitmap.createBitmap(TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE, Config.ARGB_8888)
 
         frameToCropTransform = ImageUtils.getTransformationMatrix(
             previewWidth, previewHeight,
-            cropSize, cropSize,
+            TF_OD_API_INPUT_SIZE, TF_OD_API_INPUT_SIZE,
             sensorOrientation!!, MAINTAIN_ASPECT
         )
 
@@ -141,8 +137,7 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
     }
 
     override fun processImage() {
-        ++timestamp
-        val currTimestamp = timestamp
+        val currTimestamp = timestamp++
         val originalLuminance = luminance
         tracker!!.onFrame(
             previewWidth,
@@ -182,10 +177,11 @@ class DetectorActivity : CameraActivity(), OnImageAvailableListener {
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap!!)
             val canvas1 = Canvas(cropCopyBitmap!!)
-            val paint = Paint()
-            paint.color = Color.RED
-            paint.style = Style.STROKE
-            paint.strokeWidth = 2.0f
+            val paint = Paint().apply {
+                color = Color.RED
+                style = Style.STROKE
+                strokeWidth = 2.0f
+            }
 
             var minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API
             if (MODE == DetectorActivity.DetectorMode.TF_OD_API) minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API

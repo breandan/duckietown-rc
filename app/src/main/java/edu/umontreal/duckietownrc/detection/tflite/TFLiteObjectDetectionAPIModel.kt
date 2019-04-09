@@ -64,8 +64,7 @@ class TFLiteObjectDetectionAPIModel private constructor() : Classifier {
         Trace.beginSection("recognizeImage")
 
         Trace.beginSection("preprocessBitmap")
-        // Preprocess the image data from 0-255 int to normalized float based
-        // on the provided parameters.
+        // Preprocess the image data from 0-255 int to normalized float based on the provided parameters.
         bitmap.getPixels(intValues, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
 
         imgData!!.rewind()
@@ -176,6 +175,7 @@ class TFLiteObjectDetectionAPIModel private constructor() : Classifier {
          * @param inputSize The size of image input
          * @param isQuantized Boolean representing model is quantized or not
          */
+
         @Throws(IOException::class)
         fun create(
             assetManager: AssetManager,
@@ -183,47 +183,39 @@ class TFLiteObjectDetectionAPIModel private constructor() : Classifier {
             labelFilename: String,
             inputSize: Int,
             isQuantized: Boolean
-        ): Classifier {
-            val d = TFLiteObjectDetectionAPIModel()
-
-            var labelsInput: InputStream? = null
+        ) = TFLiteObjectDetectionAPIModel().apply {
             val actualFilename =
                 labelFilename.split("file:///android_asset/".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-            labelsInput = assetManager.open(actualFilename)
+            val labelsInput: InputStream? = assetManager.open(actualFilename)
             var br: BufferedReader? = null
+
             br = BufferedReader(InputStreamReader(labelsInput))
             br.forEachLine {
                 LOGGER.w(it)
-                d.labels.add(it)
+                labels.add(it)
             }
             br.close()
 
-            d.inputSize = inputSize
+            this.inputSize = inputSize
 
             try {
-                d.tfLite = Interpreter(loadModelFile(assetManager, modelFilename))
+                tfLite = Interpreter(loadModelFile(assetManager, modelFilename))
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
 
-            d.isModelQuantized = isQuantized
+            isModelQuantized = isQuantized
             // Pre-allocate buffers.
-            val numBytesPerChannel: Int
-            if (isQuantized) {
-                numBytesPerChannel = 1 // Quantized
-            } else {
-                numBytesPerChannel = 4 // Floating point
-            }
-            d.imgData = ByteBuffer.allocateDirect(1 * d.inputSize * d.inputSize * 3 * numBytesPerChannel)
-            d.imgData!!.order(ByteOrder.nativeOrder())
-            d.intValues = IntArray(d.inputSize * d.inputSize)
+            val numBytesPerChannel = if (isQuantized) 1 else 4
+            imgData = ByteBuffer.allocateDirect(1 * inputSize * inputSize * 3 * numBytesPerChannel)
+            imgData!!.order(ByteOrder.nativeOrder())
+            intValues = IntArray(inputSize * inputSize)
 
-            d.tfLite!!.setNumThreads(NUM_THREADS)
-            d.outputLocations = Array(1) { Array(NUM_DETECTIONS) { FloatArray(4) } }
-            d.outputClasses = Array(1) { FloatArray(NUM_DETECTIONS) }
-            d.outputScores = Array(1) { FloatArray(NUM_DETECTIONS) }
-            d.numDetections = FloatArray(1)
-            return d
+            tfLite!!.setNumThreads(NUM_THREADS)
+            outputLocations = Array(1) { Array(NUM_DETECTIONS) { FloatArray(4) } }
+            outputClasses = Array(1) { FloatArray(NUM_DETECTIONS) }
+            outputScores = Array(1) { FloatArray(NUM_DETECTIONS) }
+            numDetections = FloatArray(1)
         }
     }
 }

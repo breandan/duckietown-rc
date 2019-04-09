@@ -376,9 +376,7 @@ class ObjectTracker protected constructor(
             this.type = type
         }
 
-        internal fun delta(other: Keypoint): Keypoint {
-            return Keypoint(this.x - other.x, this.y - other.y)
-        }
+        internal fun delta(other: Keypoint) = Keypoint(this.x - other.x, this.y - other.y)
     }
 
     /**
@@ -407,7 +405,7 @@ class ObjectTracker protected constructor(
 
         val minScore: Float
         val maxScore: Float
-        val KEYPOINT_STEP = 7
+        private val KEYPOINT_STEP = 7
 
         init {
             var minScore = 100.0f
@@ -415,8 +413,7 @@ class ObjectTracker protected constructor(
 
             pointDeltas = Vector(framePoints.size / KEYPOINT_STEP)
 
-            var i = 0
-            while (i < framePoints.size) {
+            for(i in 0..framePoints.size step KEYPOINT_STEP) {
                 val x1 = framePoints[i + 0] * DOWNSAMPLE_FACTOR
                 val y1 = framePoints[i + 1] * DOWNSAMPLE_FACTOR
 
@@ -431,7 +428,6 @@ class ObjectTracker protected constructor(
                 maxScore = Math.max(maxScore, score)
 
                 pointDeltas.add(PointChange(x1, y1, x2, y2, score, type, wasFound))
-                i += KEYPOINT_STEP
             }
 
             this.minScore = minScore

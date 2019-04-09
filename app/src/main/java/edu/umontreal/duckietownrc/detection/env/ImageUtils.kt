@@ -283,19 +283,15 @@ object ImageUtils {
         dstHeight: Int,
         applyRotation: Int,
         maintainAspectRatio: Boolean
-    ): Matrix {
-        val matrix = Matrix()
-
+    ) = Matrix().apply {
         if (applyRotation != 0) {
-            if (applyRotation % 90 != 0) {
-                LOGGER.w("Rotation of %d % 90 != 0", applyRotation)
-            }
+            if (applyRotation % 90 != 0) LOGGER.w("Rotation of %d % 90 != 0", applyRotation)
 
             // Translate so center of image is at origin.
-            matrix.postTranslate(-srcWidth / 2.0f, -srcHeight / 2.0f)
+            postTranslate(-srcWidth / 2.0f, -srcHeight / 2.0f)
 
             // Rotate around origin.
-            matrix.postRotate(applyRotation.toFloat())
+            postRotate(applyRotation.toFloat())
         }
 
         // Account for the already applied rotation, if any, and then determine how
@@ -309,23 +305,13 @@ object ImageUtils {
         if (inWidth != dstWidth || inHeight != dstHeight) {
             val scaleFactorX = dstWidth / inWidth.toFloat()
             val scaleFactorY = dstHeight / inHeight.toFloat()
-
-            if (maintainAspectRatio) {
-                // Scale by minimum factor so that dst is filled completely while
-                // maintaining the aspect ratio. Some image may fall off the edge.
-                val scaleFactor = Math.max(scaleFactorX, scaleFactorY)
-                matrix.postScale(scaleFactor, scaleFactor)
-            } else {
-                // Scale exactly to fill dst from src.
-                matrix.postScale(scaleFactorX, scaleFactorY)
-            }
+            // Scale by minimum factor so that dst is filled completely while
+            // maintaining the aspect ratio. Some image may fall off the edge.
+            // Scale exactly to fill dst from src.
+            if (maintainAspectRatio) Math.max(scaleFactorX, scaleFactorY).let { postScale(it, it) }
+            else postScale(scaleFactorX, scaleFactorY)
         }
-
-        if (applyRotation != 0) {
-            // Translate back from origin centered reference to destination frame.
-            matrix.postTranslate(dstWidth / 2.0f, dstHeight / 2.0f)
-        }
-
-        return matrix
+        // Translate back from origin centered reference to destination frame.
+        if (applyRotation != 0) postTranslate(dstWidth / 2.0f, dstHeight / 2.0f)
     }
 }

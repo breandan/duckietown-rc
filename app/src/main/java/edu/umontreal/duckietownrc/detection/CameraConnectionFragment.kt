@@ -352,7 +352,6 @@ class CameraConnectionFragment private constructor(
      * @param viewHeight The height of `mTextureView`
      */
     private fun configureTransform(viewWidth: Int, viewHeight: Int) {
-        val activity = activity
         if (null == textureView || null == activity) return
         val rotation = activity.windowManager.defaultDisplay.rotation
         val matrix = Matrix()
@@ -376,8 +375,7 @@ class CameraConnectionFragment private constructor(
     }
 
     /**
-     * Callback for Activities to use to initialize their data once the selected preview size is
-     * known.
+     * Callback for Activities to use to initialize their data once the selected preview size is known.
      */
     interface ConnectionCallback {
         fun onPreviewSizeChosen(size: Size, cameraRotation: Int)

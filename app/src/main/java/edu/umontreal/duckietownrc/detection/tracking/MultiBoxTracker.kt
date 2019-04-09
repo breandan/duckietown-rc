@@ -34,7 +34,6 @@ import java.util.LinkedList
 import java.util.Queue
 
 class MultiBoxTracker(private val context: Context) {
-
     private val TEXT_SIZE_DIP = 18f
     // Maximum percentage of a box that can be overlapped by another box at detection time. Otherwise
     // the lower scored box (new or old) will be removed.
@@ -76,9 +75,8 @@ class MultiBoxTracker(private val context: Context) {
         strokeMiter = 100f
     }
 
-    private val textSizePx: Float = TypedValue.applyDimension(
-        TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.resources.displayMetrics
-    )
+    private val textSizePx: Float =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, context.resources.displayMetrics)
 
     private val borderedText = BorderedText(textSizePx)
     private var objectTracker: ObjectTracker? = null
@@ -126,9 +124,7 @@ class MultiBoxTracker(private val context: Context) {
     }
 
     @Synchronized
-    fun trackResults(
-        results: List<Recognition>, frame: ByteArray, timestamp: Long
-    ) {
+    fun trackResults(results: List<Recognition>, frame: ByteArray, timestamp: Long) {
         logger.i("Processing %d results from %d", results.size, timestamp)
         processResults(timestamp, results, frame)
     }
@@ -149,14 +145,13 @@ class MultiBoxTracker(private val context: Context) {
             false
         )
         for (recognition in trackedObjects) {
-            val trackedPos = if (objectTracker != null) recognition.trackedObject!!.trackedPositionInPreviewFrame
+            val trackedPos = if (objectTracker != null) recognition.trackedObject!!.trackedPositionInPreviewFrame!!
             else RectF(recognition.location)
 
             frameToCanvasMatrix!!.mapRect(trackedPos)
             boxPaint.color = recognition.color
 
-            var cornerSize = Math.min(trackedPos!!.width(), trackedPos.height()) / 8.0f
-            cornerSize = 1.0f
+            val cornerSize = 1.0f
             canvas.drawRoundRect(trackedPos, cornerSize, cornerSize, boxPaint)
 
             val labelString = if (!TextUtils.isEmpty(recognition.title))
@@ -172,14 +167,7 @@ class MultiBoxTracker(private val context: Context) {
     }
 
     @Synchronized
-    fun onFrame(
-        w: Int,
-        h: Int,
-        rowStride: Int,
-        sensorOrientation: Int,
-        frame: ByteArray,
-        timestamp: Long
-    ) {
+    fun onFrame(w: Int, h: Int, rowStride: Int, sensorOrientation: Int, frame: ByteArray, timestamp: Long) {
         if (objectTracker == null && !initialized) {
             ObjectTracker.clearInstance()
 
@@ -260,9 +248,7 @@ class MultiBoxTracker(private val context: Context) {
         for (potential in rectsToTrack) handleDetection(originalFrame, timestamp, potential)
     }
 
-    private fun handleDetection(
-        frameCopy: ByteArray, timestamp: Long, potential: Pair<Float, Recognition>
-    ) {
+    private fun handleDetection(frameCopy: ByteArray, timestamp: Long, potential: Pair<Float, Recognition>) {
         val potentialObject = objectTracker!!.trackObject(potential.second.location!!, timestamp, frameCopy)
 
         val potentialCorrelation = potentialObject.currentCorrelation
@@ -360,14 +346,16 @@ class MultiBoxTracker(private val context: Context) {
             potential.first,
             potential.second.location!!
         )
-        val trackedRecognition = TrackedRecognition()
-        trackedRecognition.detectionConfidence = potential.first
-        trackedRecognition.trackedObject = potentialObject
-        trackedRecognition.title = potential.second.title
 
-        // Use the color from a replaced object before taking one from the color queue.
-        trackedRecognition.color = recogToReplace?.color ?: availableColors.poll()
-        trackedObjects.add(trackedRecognition)
+        TrackedRecognition().apply {
+            detectionConfidence = potential.first
+            trackedObject = potentialObject
+            title = potential.second.title
+
+            // Use the color from a replaced object before taking one from the color queue.
+            color = recogToReplace?.color ?: availableColors.poll()
+            trackedObjects.add(this)
+        }
     }
 
     private class TrackedRecognition {

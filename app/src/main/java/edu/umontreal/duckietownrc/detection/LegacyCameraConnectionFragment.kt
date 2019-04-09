@@ -82,10 +82,7 @@ class LegacyCameraConnectionFragment(
             camera!!.startPreview()
         }
 
-        override fun onSurfaceTextureSizeChanged(
-            texture: SurfaceTexture, width: Int, height: Int
-        ) {
-        }
+        override fun onSurfaceTextureSizeChanged(texture: SurfaceTexture, width: Int, height: Int) {}
 
         override fun onSurfaceTextureDestroyed(texture: SurfaceTexture) = true
 
@@ -105,15 +102,12 @@ class LegacyCameraConnectionFragment(
             return -1
         }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ) = inflater.inflate(layout, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) =
+        inflater.inflate(layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         textureView = view.findViewById(R.id.texture)
     }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) = super.onActivityCreated(savedInstanceState)
 
     override fun onResume() {
         super.onResume()
@@ -123,7 +117,8 @@ class LegacyCameraConnectionFragment(
         // a camera and start preview from here (otherwise, we wait until the surface is ready in
         // the SurfaceTextureListener).
 
-        if (textureView!!.isAvailable) camera!!.startPreview() else textureView!!.surfaceTextureListener = surfaceTextureListener
+        if (textureView!!.isAvailable) camera!!.startPreview() else textureView!!.surfaceTextureListener =
+            surfaceTextureListener
     }
 
     override fun onPause() {

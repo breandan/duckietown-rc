@@ -51,9 +51,8 @@ class Logger
 
     fun isLoggable(logLevel: Int) = logLevel >= minLogLevel || Log.isLoggable(tag, logLevel)
 
-    private fun toMessage(format: String, vararg args: Any): String {
-        return messagePrefix + if (args.isNotEmpty()) String.format(format, *args) else format
-    }
+    private fun toMessage(format: String, vararg args: Any) =
+        messagePrefix + if (args.isNotEmpty()) String.format(format, *args) else format
 
     fun v(format: String, vararg args: Any) {
         if (isLoggable(Log.VERBOSE)) Log.v(tag, toMessage(format, *args))

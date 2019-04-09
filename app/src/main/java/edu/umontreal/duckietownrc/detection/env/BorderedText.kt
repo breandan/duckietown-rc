@@ -60,14 +60,12 @@ class BorderedText(interiorColor: Int, exteriorColor: Int, val textSize: Float) 
     }
 
     fun drawText(canvas: Canvas, posX: Float, posY: Float, text: String, bgPaint: Paint) {
-
         val width = exteriorPaint.measureText(text)
         val textSize = exteriorPaint.textSize
         val paint = Paint(bgPaint)
         paint.style = Style.FILL
         paint.alpha = 160
         canvas.drawRect(posX, posY + textSize.toInt(), posX + width.toInt(), posY, paint)
-
         canvas.drawText(text, posX, posY + textSize, interiorPaint)
     }
 }

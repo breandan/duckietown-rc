@@ -294,7 +294,6 @@ abstract class CameraActivity : AppCompatActivity(), OnImageAvailableListener, C
 
     protected fun setFragment() {
         val cameraId = chooseCamera()
-
         val fragment: Fragment
         if (useCamera2API) {
             val camera2Fragment = CameraConnectionFragment.newInstance(
