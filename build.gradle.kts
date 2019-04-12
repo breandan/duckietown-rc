@@ -1,5 +1,5 @@
 buildscript {
-    val kotlinVersion by extra { "1.3.21" }
+    val kotlinVersion by extra { "1.3.30" }
 
     apply(from = "https://github.com/rosjava/android_core/raw/kinetic/buildscript.gradle")
     repositories {
