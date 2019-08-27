@@ -1,5 +1,5 @@
 buildscript {
-    val kotlinVersion by extra { "1.3.30" }
+    val kotlinVersion by extra { "1.3.31" }
 
     apply(from = "https://github.com/rosjava/android_core/raw/kinetic/buildscript.gradle")
     repositories {
@@ -8,10 +8,10 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:3.5.0-alpha10")
+        classpath("com.android.tools.build:gradle:3.6.0-alpha07")
         classpath("de.undercouch:gradle-download-task:3.4.3")
 
-        classpath(kotlin("gradle-plugin", version = kotlinVersion))
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
 
@@ -25,6 +25,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+	//maven("https://raw.githubusercontent.com/breandan/kotlingrad/master/releases")
     }
 
     group = "com.github.rosjava.android_apps"
@@ -38,6 +39,6 @@ allprojects {
 subprojects {
     apply {
         plugin("ros-android")
-//        plugin("de.undercouch.download")
+        plugin("de.undercouch.download")
     }
 }

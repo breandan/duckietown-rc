@@ -30,6 +30,10 @@ android {
         noCompress("tflite")
     }
 
+    lintOptions {
+        setAbortOnError(false)
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -77,4 +81,6 @@ dependencies {
     testImplementation("junit:junit:4.12")
     androidTestImplementation("androidx.test.ext:junit:1.1.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.1.1")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+//    compileOnly("edu.umontreal:kotlingrad:0.1")
 }
