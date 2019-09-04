@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:3.6.0-alpha07")
+        classpath("com.android.tools.build:gradle:3.6.0-alpha09")
         classpath("de.undercouch:gradle-download-task:3.4.3")
 
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
@@ -25,7 +25,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-	//maven("https://raw.githubusercontent.com/breandan/kotlingrad/master/releases")
+	    maven("https://maven.pkg.github.com/breandan/kotlingrad")
     }
 
     group = "com.github.rosjava.android_apps"

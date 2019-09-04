@@ -82,5 +82,5 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.1.1")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
-//    compileOnly("edu.umontreal:kotlingrad:0.1")
+    implementation("edu.umontreal:kotlingrad:0.1")
 }
